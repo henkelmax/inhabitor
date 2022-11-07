@@ -8,8 +8,13 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ColumnPos;
-import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.ChunkAccess;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class InhabitorCommands {
 
@@ -42,28 +47,57 @@ public class InhabitorCommands {
         int toX = Math.max(from.x(), to.x());
         int toZ = Math.max(from.z(), to.z());
 
-        int chunkCount = 0;
-        for (int x = fromX; x <= toX; x++) {
-            for (int z = fromZ; z <= toZ; z++) {
-                LevelChunk chunk = context.getSource().getLevel().getChunk(x, z);
-                if (chunk != null) {
-                    if (add) {
-                        chunk.setInhabitedTime(chunk.getInhabitedTime() + IntegerArgumentType.getInteger(context, "amount"));
+        int amount = IntegerArgumentType.getInteger(context, "amount");
+
+        int totalChunkCount = ((toX - fromX) + 1) * ((toZ - fromZ) + 1);
+
+        AtomicInteger x = new AtomicInteger(fromX);
+        AtomicInteger z = new AtomicInteger(fromZ);
+        AtomicInteger count = new AtomicInteger(0);
+        AtomicLong lastUpdate = new AtomicLong(0L);
+
+        MinecraftServer server = context.getSource().getLevel().getServer();
+
+        AtomicReference<Runnable> taskReference = new AtomicReference<>();
+
+        Runnable task = () -> {
+            int chunkX = x.getAndIncrement();
+            int chunkZ = z.get();
+
+            if (chunkX > toX) {
+                chunkX = fromX;
+                x.set(fromX + 1);
+                chunkZ = z.incrementAndGet();
+                if (chunkZ > toZ) {
+                    if (count.get() > 0) {
+                        context.getSource().sendSuccess(Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(count.get())), false);
                     } else {
-                        chunk.setInhabitedTime(IntegerArgumentType.getInteger(context, "amount"));
+                        context.getSource().sendFailure(Component.literal("Did not update any chunks"));
                     }
-                    chunk.setUnsaved(true);
-                    chunkCount++;
+                    return;
                 }
             }
-        }
 
-        if (chunkCount > 0) {
-            context.getSource().sendSuccess(Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(chunkCount)), false);
-        } else {
-            context.getSource().sendFailure(Component.literal("Did not update any chunks"));
-        }
+            ChunkAccess chunk = context.getSource().getLevel().getChunk(chunkX, chunkZ);
+            if (chunk != null) {
+                if (add) {
+                    chunk.setInhabitedTime(chunk.getInhabitedTime() + amount);
+                } else {
+                    chunk.setInhabitedTime(amount);
+                }
+                chunk.setUnsaved(true);
+                count.incrementAndGet();
+                if (System.currentTimeMillis() - lastUpdate.get() > 1000L) {
+                    lastUpdate.set(System.currentTimeMillis());
+                    context.getSource().sendSuccess(Component.literal("Updated %s/%s chunks (%s%%)".formatted(count.get(), totalChunkCount, (int) ((((float) count.get()) / ((float) totalChunkCount)) * 100F))), false);
+                }
+            }
 
+            server.execute(taskReference.get());
+        };
+
+        taskReference.set(task);
+        server.execute(task);
         return 1;
     }
 
