@@ -9,7 +9,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ColumnPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,13 +39,13 @@ public class InhabitorCommands {
     }
 
     public static int addInhabitedTime(CommandContext<CommandSourceStack> context, boolean add) {
-        ColumnPos from = ColumnPosArgument.getColumnPos(context, "from");
-        ColumnPos to = ColumnPosArgument.getColumnPos(context, "to");
+        ChunkPos from = ColumnPosArgument.getColumnPos(context, "from").toChunkPos();
+        ChunkPos to = ColumnPosArgument.getColumnPos(context, "to").toChunkPos();
 
-        int fromX = Math.min(from.x(), to.x());
-        int fromZ = Math.min(from.z(), to.z());
-        int toX = Math.max(from.x(), to.x());
-        int toZ = Math.max(from.z(), to.z());
+        int fromX = Math.min(from.x, to.x);
+        int fromZ = Math.min(from.z, to.z);
+        int toX = Math.max(from.x, to.x);
+        int toZ = Math.max(from.z, to.z);
 
         int amount = IntegerArgumentType.getInteger(context, "amount");
 
