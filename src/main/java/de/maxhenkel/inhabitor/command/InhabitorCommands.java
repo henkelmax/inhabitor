@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import de.maxhenkel.inhabitor.Inhabitor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
@@ -21,7 +22,7 @@ public class InhabitorCommands {
     public static final String INHABITOR_COMMAND = "inhabitor";
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> literalBuilder = Commands.literal(INHABITOR_COMMAND).requires(stack -> stack.hasPermission(2));
+        LiteralArgumentBuilder<CommandSourceStack> literalBuilder = Commands.literal(INHABITOR_COMMAND).requires(stack -> stack.hasPermission(Inhabitor.CONFIG.inhabitorCommandPermissionLevel.get()));
 
         literalBuilder.then(Commands.literal("add")
                 .then(Commands.argument("from", ColumnPosArgument.columnPos())
