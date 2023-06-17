@@ -71,7 +71,7 @@ public class InhabitorCommands {
                 chunkZ = z.incrementAndGet();
                 if (chunkZ > toZ) {
                     if (count.get() > 0) {
-                        context.getSource().sendSuccess(Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(count.get())), false);
+                        context.getSource().sendSuccess(() -> Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(count.get())), false);
                     } else {
                         context.getSource().sendFailure(Component.literal("Did not update any chunks"));
                     }
@@ -90,7 +90,7 @@ public class InhabitorCommands {
                 count.incrementAndGet();
                 if (System.currentTimeMillis() - lastUpdate.get() > 1000L) {
                     lastUpdate.set(System.currentTimeMillis());
-                    context.getSource().sendSuccess(Component.literal("Updated %s/%s chunks (%s%%)".formatted(count.get(), totalChunkCount, (int) ((((float) count.get()) / ((float) totalChunkCount)) * 100F))), false);
+                    context.getSource().sendSuccess(() -> Component.literal("Updated %s/%s chunks (%s%%)".formatted(count.get(), totalChunkCount, (int) ((((float) count.get()) / ((float) totalChunkCount)) * 100F))), false);
                 }
             }
 
