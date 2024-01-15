@@ -17,7 +17,7 @@ public class Inhabitor implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CONFIG = ConfigBuilder.build(FabricLoader.getInstance().getConfigDir().resolve(MODID).resolve("%s.properties".formatted(MODID)), ModConfig::new);
+        CONFIG = ConfigBuilder.builder(ModConfig::new).path(FabricLoader.getInstance().getConfigDir().resolve(MODID).resolve("%s.properties".formatted(MODID))).build();
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> InhabitorCommands.register(dispatcher));
     }
 
