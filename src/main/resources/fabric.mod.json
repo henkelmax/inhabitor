@@ -23,5 +23,8 @@
   },
   "breaks": {
     "fabric-api": "${fabric_api_dependency_breaks}"
-  }
+  },
+  "mixins": [
+    "inhabitor.mixins.json"
+  ]
 }

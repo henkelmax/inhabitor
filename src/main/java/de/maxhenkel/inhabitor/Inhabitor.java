@@ -14,6 +14,7 @@ public class Inhabitor implements ModInitializer {
     public static final String MODID = "inhabitor";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
     public static ModConfig CONFIG;
+    public static final ThreadLocal<Boolean> IS_TICK_SAVE = ThreadLocal.withInitial(() -> false);
 
     @Override
     public void onInitialize() {
