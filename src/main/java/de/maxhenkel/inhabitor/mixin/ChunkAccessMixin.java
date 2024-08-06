@@ -28,7 +28,6 @@ public class ChunkAccessMixin {
         }
     }
 
-
     @Inject(method = "isUnsaved", at = @At("RETURN"), cancellable = true)
     private void isUnsaved(CallbackInfoReturnable<Boolean> cir) {
         if (saveNeeded && !cir.getReturnValue()) {
