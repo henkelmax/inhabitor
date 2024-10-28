@@ -21,11 +21,9 @@ public class ChunkAccessMixin {
     }
 
 
-    @Inject(method = "setUnsaved", at = @At("RETURN"))
-    private void setUnsaved(boolean unsaved, CallbackInfo ci) {
-        if (!unsaved) {
-            saveNeeded = false;
-        }
+    @Inject(method = "tryMarkSaved", at = @At("RETURN"))
+    private void tryMarkSaved(CallbackInfoReturnable<Boolean> cir) {
+        saveNeeded = false;
     }
 
     @Inject(method = "isUnsaved", at = @At("RETURN"), cancellable = true)

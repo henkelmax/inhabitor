@@ -86,7 +86,7 @@ public class InhabitorCommands {
                 } else {
                     chunk.setInhabitedTime(amount);
                 }
-                chunk.setUnsaved(true);
+                chunk.markUnsaved();
                 count.incrementAndGet();
                 if (System.currentTimeMillis() - lastUpdate.get() > 1000L) {
                     lastUpdate.set(System.currentTimeMillis());
