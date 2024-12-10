@@ -1,6 +1,11 @@
 # Inhabitor
 
-A simple Fabric mod that adds commands to modify the `inhabitedTime` of a range of chunks.
+A simple server-side Fabric mod that adds utilities to make world pruning easier.
+
+## Features
+
+- A command to manually add/set the `inhabitedTime` of a range of chunks
+- Fixes a Minecraft bug where the inhabited time is not being updated when unmodified chunks are unloaded
 
 ## Commands
 
