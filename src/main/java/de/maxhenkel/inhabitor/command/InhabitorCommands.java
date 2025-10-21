@@ -9,13 +9,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class InhabitorCommands {
 
@@ -52,53 +47,36 @@ public class InhabitorCommands {
 
         int totalChunkCount = ((toX - fromX) + 1) * ((toZ - fromZ) + 1);
 
-        AtomicInteger x = new AtomicInteger(fromX);
-        AtomicInteger z = new AtomicInteger(fromZ);
-        AtomicInteger count = new AtomicInteger(0);
-        AtomicLong lastUpdate = new AtomicLong(0L);
-
-        MinecraftServer server = context.getSource().getLevel().getServer();
-
-        AtomicReference<Runnable> taskReference = new AtomicReference<>();
-
-        Runnable task = () -> {
-            int chunkX = x.getAndIncrement();
-            int chunkZ = z.get();
-
-            if (chunkX > toX) {
-                chunkX = fromX;
-                x.set(fromX + 1);
-                chunkZ = z.incrementAndGet();
-                if (chunkZ > toZ) {
-                    if (count.get() > 0) {
-                        context.getSource().sendSuccess(() -> Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(count.get())), false);
+        long lastUpdate = 0L;
+        int count = 0;
+        for (int chunkZ = fromZ; chunkZ <= toZ; chunkZ++) {
+            for (int chunkX = fromX; chunkX <= toX; chunkX++) {
+                ChunkAccess chunk = context.getSource().getLevel().getChunk(chunkX, chunkZ);
+                if (chunk != null) {
+                    if (add) {
+                        chunk.setInhabitedTime(chunk.getInhabitedTime() + amount);
                     } else {
-                        context.getSource().sendFailure(Component.literal("Did not update any chunks"));
+                        chunk.setInhabitedTime(amount);
                     }
-                    return;
+                    chunk.markUnsaved();
+                    count++;
+                    long time = System.currentTimeMillis();
+                    if (time - lastUpdate > 1000L) {
+                        lastUpdate = time;
+                        int finalCount = count;
+                        context.getSource().sendSuccess(() -> Component.literal("Updated %s/%s chunks (%s%%)".formatted(finalCount, totalChunkCount, (int) ((((float) finalCount) / ((float) totalChunkCount)) * 100F))), false);
+                    }
                 }
             }
+        }
 
-            ChunkAccess chunk = context.getSource().getLevel().getChunk(chunkX, chunkZ);
-            if (chunk != null) {
-                if (add) {
-                    chunk.setInhabitedTime(chunk.getInhabitedTime() + amount);
-                } else {
-                    chunk.setInhabitedTime(amount);
-                }
-                chunk.markUnsaved();
-                count.incrementAndGet();
-                if (System.currentTimeMillis() - lastUpdate.get() > 1000L) {
-                    lastUpdate.set(System.currentTimeMillis());
-                    context.getSource().sendSuccess(() -> Component.literal("Updated %s/%s chunks (%s%%)".formatted(count.get(), totalChunkCount, (int) ((((float) count.get()) / ((float) totalChunkCount)) * 100F))), false);
-                }
-            }
+        if (count > 0) {
+            int finalCount = count;
+            context.getSource().sendSuccess(() -> Component.literal("Successfully updated inhabitedTime for %s chunks".formatted(finalCount)), false);
+        } else {
+            context.getSource().sendFailure(Component.literal("Did not update any chunks"));
+        }
 
-            server.execute(taskReference.get());
-        };
-
-        taskReference.set(task);
-        server.execute(task);
         return 1;
     }
 
