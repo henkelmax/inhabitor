@@ -28,8 +28,21 @@ public class InhabitorCommands {
         literalBuilder.then(Commands.literal("set")
                 .then(Commands.argument("from", ColumnPosArgument.columnPos())
                         .then(Commands.argument("to", ColumnPosArgument.columnPos())
-                                .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
-                                        .executes(context -> addInhabitedTime(context, true))))));
+                                .then(Commands.argument("amount", IntegerArgumentType.integer(0, Integer.MAX_VALUE))
+                                        .executes(context -> addInhabitedTime(context, false))))));
+
+        literalBuilder.then(Commands.literal("get")
+                .then(Commands.argument("pos", ColumnPosArgument.columnPos())
+                        .executes(context -> {
+                            ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
+                            ChunkAccess chunk = context.getSource().getLevel().getChunk(pos.x, pos.z);
+                            if (chunk == null) {
+                                context.getSource().sendFailure(Component.literal("DCould not get chunk"));
+                                return 0;
+                            }
+                            context.getSource().sendSuccess(() -> Component.literal("Chunk inhabited time: %s".formatted(chunk.getInhabitedTime())), false);
+                            return 1;
+                        })));
 
         dispatcher.register(literalBuilder);
     }

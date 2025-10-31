@@ -1,1 +1,2 @@
-- Fixed stack overflow when running inhabitor command
+- Fixed set command adding time instead of setting
+- Added get command
