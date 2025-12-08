@@ -9,6 +9,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
@@ -17,7 +19,7 @@ public class InhabitorCommands {
     public static final String INHABITOR_COMMAND = "inhabitor";
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> literalBuilder = Commands.literal(INHABITOR_COMMAND).requires(stack -> stack.hasPermission(Inhabitor.CONFIG.inhabitorCommandPermissionLevel.get()));
+        LiteralArgumentBuilder<CommandSourceStack> literalBuilder = Commands.literal(INHABITOR_COMMAND).requires(stack -> stack.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(Inhabitor.CONFIG.inhabitorCommandPermissionLevel.get()))));
 
         literalBuilder.then(Commands.literal("add")
                 .then(Commands.argument("from", ColumnPosArgument.columnPos())
