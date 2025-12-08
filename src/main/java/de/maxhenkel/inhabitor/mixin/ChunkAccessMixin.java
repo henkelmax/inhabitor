@@ -20,17 +20,12 @@ public class ChunkAccessMixin {
         saveNeeded = true;
     }
 
-
-    @Inject(method = "tryMarkSaved", at = @At("RETURN"))
+    @Inject(method = "tryMarkSaved", at = @At("RETURN"), cancellable = true)
     private void tryMarkSaved(CallbackInfoReturnable<Boolean> cir) {
-        saveNeeded = false;
-    }
-
-    @Inject(method = "isUnsaved", at = @At("RETURN"), cancellable = true)
-    private void isUnsaved(CallbackInfoReturnable<Boolean> cir) {
         if (saveNeeded && !cir.getReturnValue()) {
-            cir.setReturnValue(Inhabitor.IS_TICK_SAVE.get());
+            cir.setReturnValue(Inhabitor.IS_SCHEDULE_UNLOAD.get());
         }
+        saveNeeded = false;
     }
 
 }

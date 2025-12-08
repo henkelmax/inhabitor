@@ -1,2 +1,3 @@
 - Fixed set command adding time instead of setting
 - Added get command
+- Fixed inhabited time fix not working properly anymore
