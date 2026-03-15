@@ -37,7 +37,7 @@ public class InhabitorCommands {
                 .then(Commands.argument("pos", ColumnPosArgument.columnPos())
                         .executes(context -> {
                             ChunkPos pos = ColumnPosArgument.getColumnPos(context, "pos").toChunkPos();
-                            ChunkAccess chunk = context.getSource().getLevel().getChunk(pos.x, pos.z);
+                            ChunkAccess chunk = context.getSource().getLevel().getChunk(pos.x(), pos.z());
                             if (chunk == null) {
                                 context.getSource().sendFailure(Component.literal("DCould not get chunk"));
                                 return 0;
@@ -53,10 +53,10 @@ public class InhabitorCommands {
         ChunkPos from = ColumnPosArgument.getColumnPos(context, "from").toChunkPos();
         ChunkPos to = ColumnPosArgument.getColumnPos(context, "to").toChunkPos();
 
-        int fromX = Math.min(from.x, to.x);
-        int fromZ = Math.min(from.z, to.z);
-        int toX = Math.max(from.x, to.x);
-        int toZ = Math.max(from.z, to.z);
+        int fromX = Math.min(from.x(), to.x());
+        int fromZ = Math.min(from.z(), to.z());
+        int toX = Math.max(from.x(), to.x());
+        int toZ = Math.max(from.z(), to.z());
 
         int amount = IntegerArgumentType.getInteger(context, "amount");
 
