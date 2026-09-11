@@ -16,7 +16,7 @@ public class ChunkAccessMixin {
     private volatile boolean saveNeeded;
 
     @Inject(method = "incrementInhabitedTime", at = @At("RETURN"))
-    private void incrementInhabitedTime(long l, CallbackInfo ci) {
+    private void incrementInhabitedTime(CallbackInfo ci) {
         saveNeeded = true;
     }
 
